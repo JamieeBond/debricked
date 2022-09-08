@@ -207,6 +207,9 @@
             "config/packages/messenger.yaml"
         ]
     },
+    "symfony/mime": {
+        "version": "v6.1.4"
+    },
     "symfony/notifier": {
         "version": "6.1",
         "recipe": {
@@ -235,6 +238,9 @@
         ]
     },
     "symfony/polyfill-intl-grapheme": {
+        "version": "v1.26.0"
+    },
+    "symfony/polyfill-intl-idn": {
         "version": "v1.26.0"
     },
     "symfony/polyfill-intl-normalizer": {

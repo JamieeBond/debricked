@@ -31,10 +31,10 @@ class Upload
     private ?int $status = null;
 
     /**
-     * @var string|null
+     * @var string
      */
-    #[ORM\Column(length: 1000, nullable: true)]
-    private ?string $ciUploadId = null;
+    #[ORM\Column(length: 1000)]
+    private string $ciUploadId;
 
     /**
      * @var string
@@ -59,9 +59,10 @@ class Upload
      * @param string $commitName
      * @param array $files
      */
-    public function __construct(string $repositoryName, string $commitName, array $files)
+    public function __construct(string $ciUploadId, string $repositoryName, string $commitName, array $files)
     {
         $this->uploadedOn = New DateTime();
+        $this->ciUploadId = $ciUploadId;
         $this->repositoryName = $repositoryName;
         $this->commitName = $commitName;
         $this->files = $files;
@@ -112,21 +113,11 @@ class Upload
     }
 
     /**
-     * @return string|null
+     * @return string
      */
-    public function getCiUploadId(): ?string
+    public function getCiUploadId(): string
     {
         return $this->ciUploadId;
-    }
-
-    /**
-     * @param string|null $ciUploadId
-     * @return $this
-     */
-    public function setCiUploadId(?string $ciUploadId): self
-    {
-        $this->ciUploadId = $ciUploadId;
-        return $this;
     }
 
     /**
