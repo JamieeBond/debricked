@@ -11,6 +11,12 @@ services:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
+    # tag handler to symfony's messenger
+    _instanceof:
+        App\CQRS\CommandHandler:
+            tags:
+                - { name: messenger.message_handler, bus: command.bus }
+
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
     App\:

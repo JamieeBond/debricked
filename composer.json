@@ -19,7 +19,9 @@
         "symfony/notifier": "6.1.*",
         "symfony/proxy-manager-bridge": "6.1.*",
         "symfony/runtime": "6.1.*",
+        "symfony/serializer": "6.1.*",
         "symfony/slack-notifier": "6.1.*",
+        "symfony/validator": "6.1.*",
         "symfony/yaml": "6.1.*"
     },
     "config": {
