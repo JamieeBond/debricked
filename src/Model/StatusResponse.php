@@ -1,6 +1,6 @@
 <?php
 
-namespace Model;
+namespace App\Model;
 
 /**
  * Model for json response from Debricked's status.
