@@ -8,6 +8,9 @@ use Symfony\Component\Serializer\Normalizer\ConstraintViolationListNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
+/**
+ * Containing functions relating to validation.
+ */
 class ValidationUtil
 {
     /**
@@ -24,6 +27,8 @@ class ValidationUtil
     }
 
     /**
+     * Validate constraints and return a json response.
+     *
      * @param mixed $value
      * @return JsonResponse|null
      * @throws ExceptionInterface

@@ -3,19 +3,27 @@
 namespace App\HttpClient;
 
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Symfony\Contracts\HttpClient\ResponseStreamInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
-use Exception;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
 /**
- *  Generates a token, to interact with Debricked's API, from login details.
+ *  Authenticated HTTP client, to interact with Debricked's API, from login credentials.
  */
 class AuthenticatedHttpClient implements HttpClientInterface
 {
+    /**
+     * Debricked's base url.
+     */
     private const BASE_URL = 'https://debricked.com/api';
+
+    /**
+     * Debricked's current API version.
+     */
     private const API_VERSION = '1.0';
 
     /**
@@ -46,11 +54,16 @@ class AuthenticatedHttpClient implements HttpClientInterface
     }
 
     /**
+     * Make authenticated debirkced requests.
+     *
      * @param string $method
      * @param string $path
      * @param array $options
      * @return ResponseInterface
      * @throws TransportExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
      */
     public function request(string $method, string $path, array $options = []): ResponseInterface
     {
@@ -86,6 +99,15 @@ class AuthenticatedHttpClient implements HttpClientInterface
         $this->client->withOptions($options);
     }
 
+    /**
+     * Generate token needed for debricked's API authentication.
+     *
+     * @return string
+     * @throws TransportExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     */
     private function generateToken(): string
     {
         $url = self::BASE_URL.'/login_check';
@@ -100,18 +122,13 @@ class AuthenticatedHttpClient implements HttpClientInterface
             ['json' => $body]
         );
 
-        if (Response::HTTP_OK !== $response->getStatusCode()) {
-            throw new Exception($response->getContent());
+        $statusCode = $response->getStatusCode();
+
+        if ($statusCode >= 400) {
+            throw new ResponseException($statusCode);
         }
 
         $response = json_decode($response->getContent(), true);
-
-        if (null === $response or !array_key_exists('token', $response)) {
-            throw new Exception(sprintf(
-                '"%s" returned no token',
-                $url
-            ));
-        }
 
         return $response['token'];
     }

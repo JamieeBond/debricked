@@ -3,6 +3,7 @@
 namespace App\Util;
 
 use App\HttpClient\AuthenticatedHttpClient;
+use App\HttpClient\ResponseException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\Part\DataPart;
@@ -12,8 +13,11 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Exception;
 
+
+/**
+ * Util with common interactions with Debricked's API.
+ */
 class DebrickedApiUtil
 {
     /**
@@ -51,7 +55,7 @@ class DebrickedApiUtil
      * @throws TransportExceptionInterface
      * @throws DecodingExceptionInterface
      */
-    public function uploadDependencyFile(string $repositoryName, string $commitName, string $filePathname, ?string $ciUploadId = null)
+    public function uploadDependencyFile(string $repositoryName, string $commitName, string $filePathname, ?string $ciUploadId = null): string
     {
         $data = [
             'repositoryName' => $repositoryName,
@@ -77,8 +81,10 @@ class DebrickedApiUtil
             $options
         );
 
-        if (Response::HTTP_OK !== $response->getStatusCode()) {
-            throw new Exception($response->getContent());
+        $statusCode = $response->getStatusCode();
+
+        if (Response::HTTP_OK !== $statusCode) {
+            throw new ResponseException($statusCode);
         }
 
         return (string) $response->toArray()['ciUploadId'];
@@ -104,8 +110,10 @@ class DebrickedApiUtil
             ['json' => $body]
         );
 
-        if (Response::HTTP_NO_CONTENT !== $response->getStatusCode()) {
-            throw new Exception($response->getContent());
+        $statusCode = $response->getStatusCode();
+
+        if (Response::HTTP_NO_CONTENT !== $statusCode) {
+            throw new ResponseException($statusCode);
         }
 
         return $ciUploadId;
