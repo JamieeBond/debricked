@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\Upload;
 use App\Messenger\ScanMessenger;
+use App\Model\Trigger;
 use App\Traits\BadResponseTrait;
 use App\Util\DebrickedApiUtil;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,7 +21,8 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface as HttpTransportException;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface as MailerTransportException;
 
 
 /**
@@ -28,7 +30,7 @@ use \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
  */
 #[AsCommand(
     name: 'app:run-scan',
-    description: 'Add a short description for your command',
+    description: 'Check the status of uploaded files.',
 )]
 class RunScanCommand extends Command
 {
@@ -55,6 +57,7 @@ class RunScanCommand extends Command
      * @param EntityManagerInterface $em
      * @param DebrickedApiUtil $apiUtil
      * @param SerializerInterface $serializer
+     * @param ScanMessenger $scanMessenger
      */
     public function __construct(EntityManagerInterface $em, DebrickedApiUtil $apiUtil, SerializerInterface $serializer, ScanMessenger $scanMessenger)
     {
@@ -72,10 +75,10 @@ class RunScanCommand extends Command
     {
         $this
             ->addOption('action_email', 'a', InputOption::VALUE_OPTIONAL, 'Send email when a trigger goes off.', 0)
-            ->addOption('trigger_scan_in_progress', 'tsip', InputOption::VALUE_OPTIONAL, 'Trigger when a scan is in progress.', 0)
-            ->addOption('trigger_scan_is_complete', 'tsic', InputOption::VALUE_OPTIONAL, 'Trigger when a scan is complete.', 0)
-            ->addOption('trigger_vulnerabilities_greater_than', 'tvgt', InputOption::VALUE_OPTIONAL, 'Trigger when vulnerabilities are greater than', null)
-            ->addOption('trigger_cvss_greater_than', 'tcgt', InputOption::VALUE_OPTIONAL, 'Trigger when CVSS\'s are greater than', null)
+            ->addOption('trigger_scan_in_progress', 'tsip', InputOption::VALUE_OPTIONAL, Trigger::SCAN_IN_PROGRESS, 0)
+            ->addOption('trigger_scan_is_complete', 'tsic', InputOption::VALUE_OPTIONAL, Trigger::SCAN_IS_COMPLETE, 0)
+            ->addOption('trigger_vulnerabilities_greater_than', 'tvgt', InputOption::VALUE_OPTIONAL, Trigger::VULNERABILITIES_GREATER_THAN, null)
+            ->addOption('trigger_cvss_greater_than', 'tcgt', InputOption::VALUE_OPTIONAL, Trigger::CVSS_GREATER_THAN, null)
         ;
     }
 
@@ -86,17 +89,20 @@ class RunScanCommand extends Command
      * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
+     * @throws HttpTransportException
+     * @throws MailerTransportException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
+        $io->comment($this->getDescription());
+
         $actionEmail = (bool) $input->getOption('action_email');
         $triggerScanInProgress = (bool) $input->getOption('trigger_scan_in_progress');
         $triggerScanIsComplete = (bool) $input->getOption('trigger_scan_is_complete');
         $triggerVulnerabilitiesGreaterThan = $input->getOption('trigger_vulnerabilities_greater_than');
-        $triggerCvssGreaterThan = $input->getOption('trigger_vulnerabilities_greater_than');
+        $triggerCvssGreaterThan = $input->getOption('trigger_cvss_greater_than');
 
         $em = $this->em;
 
@@ -109,7 +115,7 @@ class RunScanCommand extends Command
             $numOfUploads
         ));
 
-        if ($numOfUploads) {
+        if (0 === $numOfUploads) {
             $io->success('Finished, no files needed scanning.');
             return Command::SUCCESS;
         }
@@ -117,54 +123,80 @@ class RunScanCommand extends Command
         $failures = 0;
 
         foreach ($uploads as $upload) {
-            $response = $this->apiUtil->currentFileStatus($upload->getCiUploadId());
+            $triggers = [];
+
+            $ciUploadId = $upload->getCiUploadId();
+
+            $response = $this->apiUtil->currentFileStatus($ciUploadId);
             $statusCode = $response->getStatusCode();
 
             // Display errors and skip to the next upload.
             if ($statusCode >= 400) {
-                $io->error($this->getDescriptionFromStatus($statusCode));
+                $io->caution($this->getDescriptionFromStatus($statusCode));
                 $failures++;
                 continue;
             }
 
             $upload->setStatus($statusCode);
 
+            // If scan is still in progress no further processing is needed.
             if (Response::HTTP_ACCEPTED === $statusCode) {
-                if ($triggerScanInProgress and $actionEmail) {
-                    // Action here;
+                if ($triggerScanInProgress) {
+                    $triggers[] = new Trigger(Trigger::SCAN_IN_PROGRESS);
                 }
-                // Scan in progress still, so skip.
-                continue;
+                $io->success(sprintf(
+                    'Scan still in progress for %s.',
+                    $upload->getCiUploadId()
+                ));
+            } else {
+                // Map json response to model
+                $statusResponse = $this->serializer->deserialize(
+                    $response->getContent(),
+                    StatusResponse::class,
+                    'json',
+                    [DenormalizerInterface::COLLECT_DENORMALIZATION_ERRORS => true]
+                );
+
+                // Logic for triggers.
+                if (Response::HTTP_OK === $statusCode) {
+                    if ($triggerScanIsComplete) {
+                        $triggers[] = new Trigger(Trigger::SCAN_IS_COMPLETE);
+                    }
+
+                    if ($statusResponse->getVulnerabilitiesFound() > $triggerVulnerabilitiesGreaterThan and
+                        null !== $triggerVulnerabilitiesGreaterThan
+                    ) {
+                        $triggers[] = new Trigger(
+                            Trigger::VULNERABILITIES_GREATER_THAN,
+                            $triggerVulnerabilitiesGreaterThan,
+                            $statusResponse->getVulnerabilitiesFound()
+                        );
+                    }
+
+                    if ($statusResponse->getMaxCvss() > $triggerCvssGreaterThan and
+                        null !== $triggerCvssGreaterThan
+                    ) {
+                        $triggers[] = new Trigger(
+                            Trigger::CVSS_GREATER_THAN,
+                            $triggerCvssGreaterThan,
+                            $statusResponse->getMaxCvss()
+                        );
+                    }
+                }
+
+                $io->success(sprintf(
+                    'Scan finished for %s.',
+                    $upload->getCiUploadId()
+                ));
             }
 
-            // Map json response to model
-            $statusResponse = $this->serializer->deserialize(
-                $response->getContent(),
-                StatusResponse::class,
-                'json',
-                [DenormalizerInterface::COLLECT_DENORMALIZATION_ERRORS => true]
-            );
-
-            // Trigger logic only needed if scan is complete and there is an action.
-            if (Response::HTTP_OK === $statusCode and $actionEmail) {
-                if ($triggerScanIsComplete) {
-                    // Action here;
-                }
-
-                if ($triggerVulnerabilitiesGreaterThan > $statusResponse->getVulnerabilitiesFound()) {
-                    // Action here;
-                }
-
-                if ($triggerCvssGreaterThan > $statusResponse->getMaxCvss()) {
-                    // Action here;
-                }
+            // Send email if there are triggers and a email action.
+            if (0 !== count($triggers) and $actionEmail) {
+                $this->scanMessenger->sendTriggeredEmail(
+                    $upload,
+                    $triggers
+                );
             }
-
-            $io->success(sprintf(
-                'Scan finished for %s.',
-                $upload->getCiUploadId()
-            ));
-
         }
 
         // If no uploads are successful, then error the command

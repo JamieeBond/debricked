@@ -6,6 +6,8 @@
 parameters:
     debricked_username: '%env(DEBRICKED_USERNAME)%'
     debricked_password: '%env(DEBRICKED_PASSWORD)%'
+    email_action_from: '%env(EMAIL_ACTION_FROM)%'
+    email_action_to: '%env(EMAIL_ACTION_TO)%'
 
 services:
     # default configuration for services in *this* file
@@ -39,3 +41,8 @@ services:
         arguments:
             $username: "%debricked_username%"
             $password: "%debricked_password%"
+
+    App\Messenger\ScanMessenger:
+        arguments:
+            $emailFrom: "%email_action_from%"
+            $emailTo: "%email_action_to%"

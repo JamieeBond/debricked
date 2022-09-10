@@ -1,0 +1,27 @@
+<p>Hi,</p>
+
+<p>The scan has triggered the following triggers:</p>
+
+<p><strong>Repository:</strong> {{ upload.repositoryName }}</p>
+<p><strong>Commit:</strong> {{ upload.commitName }}</p>
+
+{% set tableStyle = 'border:1px solid black;' %}
+
+<table style="{{ tableStyle }} border-collapse:collapse;">
+    <tr>
+        <th style="{{ tableStyle }}">Type</th>
+        <th style="{{ tableStyle }}">Criteria</th>
+        <th style="{{ tableStyle }}">Value</th>
+    </tr>
+    {% for trigger in triggers %}
+        <tr>
+            <td style="{{ tableStyle }}">{{ trigger.type }}</td>
+            <td style="{{ tableStyle }}">{{ trigger.criteria|default('N/A') }}</td>
+            <td style="{{ tableStyle }}">{{ trigger.value|default('N/A') }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<p><a href="https://debricked.com/app/en/repositories">Click here to view.</a></p>
+
+<p>Thank you.</p>
