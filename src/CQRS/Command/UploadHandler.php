@@ -4,14 +4,18 @@ namespace App\CQRS\Command;
 
 use App\CQRS\CommandHandler;
 use App\Entity\Upload;
-use App\HttpClient\AuthenticatedHttpClient;
 use App\Util\DebrickedApiUtil;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Mime\Part\DataPart;
-use Symfony\Component\Mime\Part\Multipart\FormDataPart;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 
+
+/**
+ * UploadHandler to forward files to debricked and record the upload in the db.
+ */
 class UploadHandler implements CommandHandler
 {
     /**
@@ -19,9 +23,15 @@ class UploadHandler implements CommandHandler
      */
     private EntityManagerInterface $em;
 
+    /**
+     * @var DebrickedApiUtil
+     */
     private DebrickedApiUtil $apiUtil;
 
-
+    /**
+     * @param EntityManagerInterface $em
+     * @param DebrickedApiUtil $apiUtil
+     */
     public function __construct(EntityManagerInterface $em, DebrickedApiUtil $apiUtil)
     {
         $this->em = $em;
@@ -31,6 +41,11 @@ class UploadHandler implements CommandHandler
     /**
      * @param UploadCommand $command
      * @return void
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
     public function __invoke(UploadCommand $command): void
     {
@@ -38,7 +53,7 @@ class UploadHandler implements CommandHandler
         $commitName = $command->getCommitName();
 
         $fileNames = [];
-        $ciUploadId = null;
+        $firstCiUploadId = null;
 
         foreach($command->getFiles() as $file) {
             $fileNames[] = $file->getClientOriginalName();
@@ -46,17 +61,22 @@ class UploadHandler implements CommandHandler
                 $repositoryName,
                 $commitName,
                 $file->getPathname(),
-                $ciUploadId
+                $firstCiUploadId
             );
 
+            // The first ciUploadId is required for the remaining files.
+            if (null === $firstCiUploadId) {
+                $firstCiUploadId = $ciUploadId;
+            }
         }
 
+        // Once all files are uploaded, the files need to be concluded.
         $this->apiUtil->concludeFileUpload(
-            $ciUploadId
+            $firstCiUploadId
         );
 
         $upload = new Upload(
-            $ciUploadId,
+            $firstCiUploadId,
             $command->getRepositoryName(),
             $command->getCommitName(),
             $fileNames

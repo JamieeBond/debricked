@@ -7,6 +7,9 @@ use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
 
+/**
+ * UploadCommand command with validation to validate before uploading to debricked.
+ */
 class UploadCommand implements Command
 {
     /**
@@ -36,6 +39,9 @@ class UploadCommand implements Command
         $this->files = $files;
     }
 
+    /**
+     * @return string
+     */
     public function getRepositoryName(): string
     {
         return $this->repositoryName;
