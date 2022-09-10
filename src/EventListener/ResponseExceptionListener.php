@@ -2,7 +2,7 @@
 
 namespace App\EventListener;
 
-use App\HttpClient\ResponseException;
+use App\HttpClient\BadResponseException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
@@ -21,7 +21,7 @@ class ResponseExceptionListener
         $exception = $exception->getPrevious();
 
         // Only care about the original exception
-        if (!$exception instanceof ResponseException) {
+        if (!$exception instanceof BadResponseException) {
             return;
         }
 

@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Upload;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @extends ServiceEntityRepository<Upload>
@@ -22,5 +23,20 @@ class UploadRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Upload::class);
+    }
+
+    /**
+     * @return array
+     */
+    public function findAllUnscanned(): array
+    {
+        return $this
+            ->createQueryBuilder('u')
+            ->select('u')
+            ->where('(u.status <> :scanned OR u.status IS NULL)')
+            ->setParameter('scanned', Response::HTTP_OK)
+            ->getQuery()
+            ->getResult()
+        ;
     }
 }

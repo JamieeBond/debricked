@@ -3,7 +3,7 @@
 namespace App\Util;
 
 use App\HttpClient\AuthenticatedHttpClient;
-use App\HttpClient\ResponseException;
+use App\HttpClient\BadResponseException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\Part\DataPart;
@@ -13,7 +13,7 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 /**
  * Util with common interactions with Debricked's API.
@@ -29,6 +29,11 @@ class DebrickedApiUtil
      * Path to conclude files uploads.
      */
     private const CONCLUDE_FILES_UPLOADS_PATH = '/open/finishes/dependencies/files/uploads';
+
+    /**
+     * Path to current file status.
+     */
+    private const CURRENT_FILE_STATUS_PATH = '/open/ci/upload/status';
 
     /**
      * @var AuthenticatedHttpClient
@@ -84,7 +89,7 @@ class DebrickedApiUtil
         $statusCode = $response->getStatusCode();
 
         if (Response::HTTP_OK !== $statusCode) {
-            throw new ResponseException($statusCode);
+            throw new BadResponseException($statusCode);
         }
 
         return (string) $response->toArray()['ciUploadId'];
@@ -113,9 +118,30 @@ class DebrickedApiUtil
         $statusCode = $response->getStatusCode();
 
         if (Response::HTTP_NO_CONTENT !== $statusCode) {
-            throw new ResponseException($statusCode);
+            throw new BadResponseException($statusCode);
         }
 
         return $ciUploadId;
+    }
+
+    /**
+     * @param string $ciUploadId
+     * @return ResponseInterface
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     */
+    public function currentFileStatus(string $ciUploadId): ResponseInterface
+    {
+        $query = [
+            'ciUploadId' => $ciUploadId,
+        ];
+
+        return $this->client->request(
+            Request::METHOD_GET,
+            self::CURRENT_FILE_STATUS_PATH,
+            ['query' => $query]
+        );
     }
 }

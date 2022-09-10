@@ -3,6 +3,7 @@
 namespace App\HttpClient;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Symfony\Contracts\HttpClient\ResponseStreamInterface;
@@ -125,7 +126,7 @@ class AuthenticatedHttpClient implements HttpClientInterface
         $statusCode = $response->getStatusCode();
 
         if ($statusCode >= 400) {
-            throw new ResponseException($statusCode);
+            throw new HttpException($statusCode, 'Issue obtaining token, check credentials.');
         }
 
         $response = json_decode($response->getContent(), true);
