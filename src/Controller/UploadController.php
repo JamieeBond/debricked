@@ -47,7 +47,7 @@ final class UploadController extends AbstractController
 
         return $this->json(
             $message,
-            Response::HTTP_CREATED
+            Response::HTTP_OK
         );
     }
 
@@ -79,7 +79,7 @@ final class UploadController extends AbstractController
 
         return $this->json(
             $message,
-            Response::HTTP_CREATED
+             Response::HTTP_CREATED
         );
     }
 }
