@@ -65,7 +65,11 @@ final class UploadController extends AbstractController
             $request->files->get('files'),
         );
 
-        $this->validationUtil->validateConstraints($command);
+        $response = $this->validationUtil->validateConstraintsResponse($command);
+
+        if (null !== $response) {
+            return $response;
+        }
 
         $this->commandBus->dispatch($command);
 

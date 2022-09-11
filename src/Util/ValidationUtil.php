@@ -33,7 +33,7 @@ class ValidationUtil
      * @return JsonResponse|null
      * @throws ExceptionInterface
      */
-    public function validateConstraints(mixed $value): ?JsonResponse
+    public function validateConstraintsResponse(mixed $value): ?JsonResponse
     {
         $violations = $this->validator->validate($value);
 
@@ -45,11 +45,9 @@ class ValidationUtil
 
         $violations = $normalizer->normalize($violations);
 
-        $response = new JsonResponse(
+        return new JsonResponse(
             $violations,
             Response::HTTP_BAD_REQUEST
         );
-
-        return $response->send();
     }
 }
