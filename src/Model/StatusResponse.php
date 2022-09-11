@@ -102,9 +102,9 @@ class StatusResponse
     /**
      * Get the highest vulnerability CVSS rating.
      *
-     * @return int
+     * @return float
      */
-    public function getMaxCvss(): int
+    public function getMaxCvss(): float
     {
         $cvss = [];
 

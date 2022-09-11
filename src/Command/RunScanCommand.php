@@ -8,7 +8,7 @@ use App\Model\Trigger;
 use App\Traits\BadResponseTrait;
 use App\Util\DebrickedApiUtil;
 use Doctrine\ORM\EntityManagerInterface;
-use Model\StatusResponse;
+use App\Model\StatusResponse;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

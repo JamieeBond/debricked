@@ -18,21 +18,21 @@ class Trigger
     private string $type;
 
     /**
-     * @var string|int|null
+     * @var string|int|float|null
      */
-    private null|string|int $criteria;
+    private string|int|float|null $criteria;
 
     /**
-     * @var string|int|null
+     * @var string|int|float|null
      */
-    private null|string|int $value;
+    private string|int|float|null $value;
 
     /**
      * @param string $type
      * @param int|string|null $criteria
      * @param int|string|null $value
      */
-    public function __construct(string $type, int|string|null $criteria = null, int|string|null $value = null)
+    public function __construct(string $type, string|int|float|null $criteria = null, string|int|float|null $value = null)
     {
         $this->type = $type;
         $this->criteria = $criteria;
@@ -48,17 +48,17 @@ class Trigger
     }
 
     /**
-     * @return int|string|null
+     * @return string|int|float|null
      */
-    public function getCriteria(): int|string|null
+    public function getCriteria(): string|int|float|null
     {
         return $this->criteria;
     }
 
     /**
-     * @return int|string|null
+     * @return string|int|float|null
      */
-    public function getValue(): int|string|null
+    public function getValue(): string|int|float|null
     {
         return $this->value;
     }
