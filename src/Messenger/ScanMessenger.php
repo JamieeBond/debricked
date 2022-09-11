@@ -7,7 +7,6 @@ use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
-
 /**
  * Messages relating to scans.
  */
