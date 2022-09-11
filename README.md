@@ -60,7 +60,7 @@ http://localhost:8888/upload
 php bin/console app:run-scan --action_email=1 --trigger_scan_in_progress=1 --trigger_scan_is_complete=1 --trigger_vulnerabilities_greater_than=2 --trigger_cvss_greater_than=3
 ```
 ![Screenshot](./docs/run_command.png? "Scan Finished")
-3. View email sent due to triggers being triggered:
+4. View email sent due to triggers being triggered:
 ```
 http://localhost:8025/
 ```
