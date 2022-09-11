@@ -1,7 +1,5 @@
 # Debricked - Code Challenge
 
-API application to return a list of products, that is also filterable.
-
 ## Summary
 An API dependency vulnerability rule engine. Dependency files are uploaded then forwarded to [Debricked's](https://debricked.com/) API. Then the scan command will send a email action, based on triggers which have been set when the command is ran.
 
