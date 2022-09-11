@@ -3,6 +3,7 @@
 namespace App\CQRS\Command;
 
 use App\CQRS\Command;
+use App\Validator\SupportedFile;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
@@ -82,5 +83,6 @@ class UploadCommand implements Command
                 ]),
             ],
         ]));
+        $metadata->addPropertyConstraint('files', new SupportedFile());
     }
 }

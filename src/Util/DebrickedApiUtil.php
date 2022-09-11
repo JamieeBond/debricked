@@ -36,6 +36,19 @@ class DebrickedApiUtil
     private const CURRENT_FILE_STATUS_PATH = '/open/ci/upload/status';
 
     /**
+     * Path to supported formats.
+     */
+    private const SUPPORTED_FORMATS_PATH = '/open/files/supported-formats';
+
+
+    /**
+     * Cached supported formats.
+     *
+     * @var array
+     */
+    private array $supportedFormats = [];
+
+    /**
      * @var AuthenticatedHttpClient
      */
     private AuthenticatedHttpClient $client;
@@ -143,5 +156,47 @@ class DebrickedApiUtil
             self::CURRENT_FILE_STATUS_PATH,
             ['query' => $query]
         );
+    }
+
+    /**
+     * @return array
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     */
+    public function getSupportedFormats(): array
+    {
+        // Use cached supported file formats, if multiple calls are made.
+        if (0 !== count($this->supportedFormats)) {
+            return $this->supportedFormats;
+        }
+
+        $response = $this->client->request(
+            Request::METHOD_GET,
+            self::SUPPORTED_FORMATS_PATH
+        );
+
+        $statusCode = $response->getStatusCode();
+
+        if (Response::HTTP_OK !== $statusCode) {
+            throw new BadResponseException($statusCode);
+        }
+
+        $supportedFiles = [];
+
+        foreach ($response->toArray() as $file) {
+            if (!empty($file['regex'])) {
+                $supportedFiles[] = $file['regex'];
+            }
+            if (0 !== count($file['lockFileRegexes'])) {
+                foreach ($file['lockFileRegexes'] as $lockFile) {
+                    $supportedFiles[] = $lockFile;
+                }
+            }
+        }
+
+        return $this->supportedFormats = $supportedFiles;
     }
 }

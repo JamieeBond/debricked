@@ -35,11 +35,10 @@ final class UploadController extends AbstractController
     }
 
     /**
-     * @param Request $request
      * @return JsonResponse
      */
     #[Route('/', name: 'app_default')]
-    public function index(Request $request): JsonResponse
+    public function index(): JsonResponse
     {
         $message = [
             'title' => 'Dependency Files Rule Engine',
