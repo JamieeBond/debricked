@@ -60,8 +60,8 @@ final class UploadController extends AbstractController
     public function upload(Request $request): JsonResponse
     {
         $command = new UploadCommand(
-            $request->get('commitName'),
             $request->get('repositoryName'),
+            $request->get('commitName'),
             $request->files->get('files'),
         );
 
