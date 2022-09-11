@@ -40,7 +40,6 @@ class DebrickedApiUtil
      */
     private const SUPPORTED_FORMATS_PATH = '/open/files/supported-formats';
 
-
     /**
      * Cached supported formats.
      *

@@ -43,6 +43,13 @@ class AuthenticatedHttpClient implements HttpClientInterface
     private string $password;
 
     /**
+     * Cached token.
+     *
+     * @var string|null
+     */
+    private ?string $token = null;
+
+    /**
      * @param HttpClientInterface $client
      * @param string $username
      * @param string $password
@@ -111,6 +118,11 @@ class AuthenticatedHttpClient implements HttpClientInterface
      */
     private function generateToken(): string
     {
+        // Use cached token, if multiple calls are made.
+        if (null !== $this->token) {
+            return $this->token;
+        }
+
         $url = self::BASE_URL.'/login_check';
         $body = [
             '_username' => $this->username,
@@ -131,6 +143,6 @@ class AuthenticatedHttpClient implements HttpClientInterface
 
         $response = json_decode($response->getContent(), true);
 
-        return $response['token'];
+        return $this->token = $response['token'];
     }
 }
