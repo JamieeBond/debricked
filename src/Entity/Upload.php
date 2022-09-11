@@ -55,6 +55,7 @@ class Upload
     private array $files = [];
 
     /**
+     * @param string $ciUploadId
      * @param string $repositoryName
      * @param string $commitName
      * @param array $files
@@ -82,16 +83,6 @@ class Upload
     public function getUploadedOn(): DateTime
     {
         return $this->uploadedOn;
-    }
-
-    /**
-     * @param DateTime $uploadedOn
-     * @return $this
-     */
-    public function setUploadedOn(DateTime $uploadedOn): self
-    {
-        $this->uploadedOn = $uploadedOn;
-        return $this;
     }
 
     /**
@@ -129,16 +120,6 @@ class Upload
     }
 
     /**
-     * @param string $repositoryName
-     * @return $this
-     */
-    public function setRepositoryName(string $repositoryName): self
-    {
-        $this->repositoryName = $repositoryName;
-        return $this;
-    }
-
-    /**
      * @return string
      */
     public function getCommitName(): string
@@ -147,30 +128,10 @@ class Upload
     }
 
     /**
-     * @param string $commitName
-     * @return $this
-     */
-    public function setCommitName(string $commitName): self
-    {
-        $this->commitName = $commitName;
-        return $this;
-    }
-
-    /**
      * @return array
      */
     public function getFiles(): array
     {
         return $this->files;
-    }
-
-    /**
-     * @param array $files
-     * @return $this
-     */
-    public function setFiles(array $files): self
-    {
-        $this->files = $files;
-        return $this;
     }
 }
