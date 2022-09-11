@@ -47,7 +47,7 @@ class UploadHandler implements CommandHandler
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function __invoke(UploadCommand $command): void
+    public function __invoke(UploadCommand $command): Upload
     {
         $repositoryName = $command->getRepositoryName();
         $commitName = $command->getCommitName();
@@ -83,5 +83,7 @@ class UploadHandler implements CommandHandler
         );
 
         $this->em->persist($upload);
+
+        return $upload;
     }
 }
