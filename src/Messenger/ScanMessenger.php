@@ -38,10 +38,11 @@ class ScanMessenger
         $this->emailFrom = $emailFrom;
         $this->emailTo = $emailTo;
     }
-
+    
     /**
      * @param Upload $upload
      * @param array $triggers
+     * @param string|null $url
      * @return TemplatedEmail
      * @throws TransportExceptionInterface
      */
