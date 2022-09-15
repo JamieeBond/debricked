@@ -44,6 +44,14 @@ class StatusResponseTest extends TestCase
         $this->assertSame($value, $statusResponse->getAutomationRules());
     }
 
+    public function testSetGetDetailsUrl(): void
+    {
+        $statusResponse = $this->createStatusResponse();
+        $value = 'www.debricked.com';
+        $statusResponse->setDetailsUrl($value);
+        $this->assertSame($value, $statusResponse->getDetailsUrl());
+    }
+
     public function testGetMaxCvss(): void
     {
         $statusResponse = $this->createStatusResponse();

@@ -22,6 +22,8 @@
     {% endfor %}
 </table>
 
-<p><a href="https://debricked.com/app/en/repositories">Click here to view.</a></p>
+{% if url != null %}
+    <p><a href="{{ url }}">Click here to view.</a></p>
+{% endif %}
 
 <p>Thank you.</p>

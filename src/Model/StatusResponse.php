@@ -28,6 +28,11 @@ class StatusResponse
     private array $automationRules;
 
     /**
+     * @var string
+     */
+    private string $detailsUrl;
+
+    /**
      * @return int
      */
     public function getProgress(): int
@@ -96,6 +101,24 @@ class StatusResponse
     public function setAutomationRules(array $automationRules): self
     {
         $this->automationRules = $automationRules;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDetailsUrl(): string
+    {
+        return $this->detailsUrl;
+    }
+
+    /**
+     * @param string $detailsUrl
+     * @return StatusResponse
+     */
+    public function setDetailsUrl(string $detailsUrl): self
+    {
+        $this->detailsUrl = $detailsUrl;
         return $this;
     }
 

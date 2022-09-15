@@ -42,10 +42,10 @@ class ScanMessenger
     /**
      * @param Upload $upload
      * @param array $triggers
-     * @return void
+     * @return TemplatedEmail
      * @throws TransportExceptionInterface
      */
-    public function sendTriggeredEmail(Upload $upload, array $triggers): void
+    public function sendTriggeredEmail(Upload $upload, array $triggers, ?string $url): TemplatedEmail
     {
         $email = new TemplatedEmail();
 
@@ -57,9 +57,13 @@ class ScanMessenger
             ->context([
                 'upload' => $upload,
                 'triggers' => $triggers,
+                'url' => $url,
             ])
         ;
 
         $this->mailer->send($email);
+
+        return $email;
+
     }
 }
