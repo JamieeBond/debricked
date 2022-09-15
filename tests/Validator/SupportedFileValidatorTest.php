@@ -19,6 +19,7 @@ class SupportedFileValidatorTest extends ConstraintValidatorTestCase
         ;
 
         $apiUtil
+            ->expects($this->atLeastOnce())
             ->method('getSupportedFormats')
             ->willReturn(['composer\.lock'])
         ;
@@ -35,6 +36,7 @@ class SupportedFileValidatorTest extends ConstraintValidatorTestCase
         ;
 
         $file
+            ->expects($this->atLeastOnce())
             ->method('getClientOriginalName')
             ->willReturn($name)
         ;

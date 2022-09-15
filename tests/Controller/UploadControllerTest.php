@@ -81,6 +81,7 @@ class UploadControllerTest extends TestCase
         $commandBus = $this->commandBus;
 
         $commandBus
+            ->expects($this->once())
             ->method('dispatch')
             ->with($this->isInstanceOf(UploadCommand::class))
         ;
@@ -88,6 +89,7 @@ class UploadControllerTest extends TestCase
         $validationUtil = $this->validationUtil;
 
         $validationUtil
+            ->expects($this->once())
             ->method('validateConstraintsResponse')
             ->with($this->isInstanceOf(UploadCommand::class))
             ->willReturn(null)

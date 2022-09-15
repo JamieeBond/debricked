@@ -66,6 +66,7 @@ class ValidationUtilTest extends TestCase
         $violationList = $this->createViolationList([$violation]);
 
         $validator
+            ->expects($this->once())
             ->method('validate')
             ->with($command)
             ->willReturn($violationList)
@@ -87,6 +88,7 @@ class ValidationUtilTest extends TestCase
         $violationList = $this->createViolationList([]);
 
         $validator
+            ->expects($this->once())
             ->method('validate')
             ->with($command)
             ->willReturn($violationList)

@@ -46,11 +46,13 @@ class UploadHandlerTest extends TestCase
         ;
 
         $uploadedFile
+            ->expects($this->atLeastOnce())
             ->method('getClientOriginalName')
             ->willReturn($name)
         ;
 
         $uploadedFile
+            ->expects($this->atLeastOnce())
             ->method('getPathname')
             ->willReturn($path)
         ;
@@ -83,6 +85,7 @@ class UploadHandlerTest extends TestCase
         );
 
         $apiUtil
+            ->expects($this->exactly(2))
             ->method('uploadDependencyFile')
             ->withConsecutive(
                 [$repositoryName, $commitName, $pathOne, null,],
@@ -92,11 +95,13 @@ class UploadHandlerTest extends TestCase
         ;
 
         $apiUtil
+            ->expects($this->once())
             ->method('concludeFileUpload')
             ->with($ciUploadId)
         ;
 
         $em
+            ->expects($this->once())
             ->method('persist')
             ->with($this->isInstanceOf(Upload::class))
         ;

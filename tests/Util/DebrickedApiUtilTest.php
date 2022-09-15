@@ -51,11 +51,13 @@ class DebrickedApiUtilTest extends TestCase
         $ciUploadId = '3455673';
 
         $response
+            ->expects($this->atLeastOnce())
             ->method('getStatusCode')
             ->willReturn(Response::HTTP_OK)
         ;
 
         $response
+            ->expects($this->atLeastOnce())
             ->method('toArray')
             ->willReturn([
                 'ciUploadId' => $ciUploadId,
@@ -63,6 +65,7 @@ class DebrickedApiUtilTest extends TestCase
         ;
 
         $client
+            ->expects($this->once())
             ->method('request')
             ->with(
                 Request::METHOD_POST,
@@ -90,11 +93,13 @@ class DebrickedApiUtilTest extends TestCase
         $response = $this->response;
 
         $response
+            ->expects($this->atLeastOnce())
             ->method('getStatusCode')
             ->willReturn(Response::HTTP_BAD_REQUEST)
         ;
 
         $client
+            ->expects($this->once())
             ->method('request')
             ->willReturn($response);
 
@@ -115,11 +120,13 @@ class DebrickedApiUtilTest extends TestCase
         $ciUploadId = '3455673';
 
         $response
+            ->expects($this->atLeastOnce())
             ->method('getStatusCode')
             ->willReturn(Response::HTTP_NO_CONTENT)
         ;
 
         $client
+            ->expects($this->once())
             ->method('request')
             ->with(
                 Request::METHOD_POST,
@@ -145,11 +152,13 @@ class DebrickedApiUtilTest extends TestCase
         $response = $this->response;
 
         $response
+            ->expects($this->atLeastOnce())
             ->method('getStatusCode')
             ->willReturn(Response::HTTP_BAD_REQUEST)
         ;
 
         $client
+            ->expects($this->once())
             ->method('request')
             ->willReturn($response);
 
@@ -168,6 +177,7 @@ class DebrickedApiUtilTest extends TestCase
         $ciUploadId = '3455673';
 
         $client
+            ->expects($this->once())
             ->method('request')
             ->with(
                 Request::METHOD_GET,
@@ -191,6 +201,7 @@ class DebrickedApiUtilTest extends TestCase
         $response = $this->response;
 
         $response
+            ->expects($this->atLeastOnce())
             ->method('getStatusCode')
             ->willReturn(Response::HTTP_OK)
         ;
@@ -208,11 +219,13 @@ class DebrickedApiUtilTest extends TestCase
         ];
 
         $response
+            ->expects($this->atLeastOnce())
             ->method('toArray')
             ->willReturn($returned)
         ;
 
         $client
+            ->expects($this->once())
             ->method('request')
             ->with(
                 Request::METHOD_GET,
@@ -235,11 +248,13 @@ class DebrickedApiUtilTest extends TestCase
         $response = $this->response;
 
         $response
+            ->expects($this->atLeastOnce())
             ->method('getStatusCode')
             ->willReturn(Response::HTTP_BAD_REQUEST)
         ;
 
         $client
+            ->expects($this->once())
             ->method('request')
             ->willReturn($response);
 

@@ -62,16 +62,19 @@ class AuthenticatedHttpClientTest extends TestCase
 
         $responseOne = $this->createResponse();
         $responseOne
+            ->expects($this->atLeastOnce())
             ->method('getStatusCode')
             ->willReturn(Response::HTTP_OK)
         ;
         $responseOne
+            ->expects($this->atLeastOnce())
             ->method('getContent')
             ->willReturn('{"token" : "' . $token . '"}')
         ;
 
         $responseTwo = $this->createResponse();
         $responseTwo
+            ->expects($this->never())
             ->method('getStatusCode')
             ->willReturn(Response::HTTP_OK)
         ;
@@ -84,6 +87,7 @@ class AuthenticatedHttpClientTest extends TestCase
         ];
 
         $client
+            ->expects($this->exactly(2))
             ->method('request')
             ->withConsecutive(
                 [Request::METHOD_POST, $baseUrl . '/login_check', ['json' => $credentials]],
@@ -116,11 +120,13 @@ class AuthenticatedHttpClientTest extends TestCase
         $response = $this->createResponse();
 
         $response
+            ->expects($this->atLeastOnce())
             ->method('getStatusCode')
             ->willReturn(Response::HTTP_CONFLICT)
         ;
 
         $client
+            ->expects($this->once())
             ->method('request')
             ->willReturn($response)
         ;
